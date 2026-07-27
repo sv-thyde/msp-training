@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Managed IT Training | SpectrumVoIP</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --blue:#0078D4;--blue-light:#EBF4FC;--blue-mid:#106EBE;
+    --gray-50:#F8F9FA;--gray-100:#F1F3F5;--gray-200:#E9ECEF;
+    --gray-300:#DEE2E6;--gray-500:#6C757D;--gray-700:#343A40;--gray-900:#212529;
+    --green:#107C10;--green-light:#E8F5E8;
+    --sidebar-w:260px;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--gray-900);background:#F4F6F8;font-size:15px;line-height:1.6}
+
+  #shell{display:flex;min-height:100vh}
+
+  #sidebar{width:var(--sidebar-w);background:#fff;border-right:1px solid var(--gray-200);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;display:flex;flex-direction:column}
+  .sb-header{padding:20px 20px 16px;border-bottom:1px solid var(--gray-200)}
+  .sb-logo{font-size:17px;font-weight:700;color:var(--blue);letter-spacing:-0.3px}
+  .sb-sub{font-size:11px;color:var(--gray-500);margin-top:2px;text-transform:uppercase;letter-spacing:0.5px}
+  .sb-nav{padding:12px 0;flex:1}
+  .sb-item{display:flex;align-items:flex-start;gap:10px;padding:9px 20px;cursor:pointer;transition:background 0.15s;border-left:3px solid transparent}
+  .sb-item:hover{background:var(--gray-50);border-left-color:var(--blue)}
+  .sb-num{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--gray-300);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--gray-500);flex-shrink:0;margin-top:1px}
+  .sb-text{font-size:13px;color:var(--gray-700);line-height:1.4}
+
+  #main{margin-left:var(--sidebar-w);flex:1}
+  #topbar{background:#fff;border-bottom:1px solid var(--gray-200);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+  .topbar-title{font-size:16px;font-weight:600;color:var(--gray-900)}
+  .topbar-sub{font-size:12px;color:var(--gray-500)}
+  #content{padding:32px;max-width:820px;width:100%}
+
+  .section-card{background:#fff;border:1px solid var(--gray-200);border-radius:10px;margin-bottom:16px;overflow:hidden}
+  .section-card.open{box-shadow:0 2px 12px rgba(0,0,0,0.07)}
+  .section-header{display:flex;align-items:center;gap:14px;padding:18px 22px;cursor:pointer;user-select:none}
+  .section-header:hover{background:var(--gray-50)}
+  .sec-badge{width:34px;height:34px;border-radius:8px;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--blue);flex-shrink:0}
+  .section-card:last-child .sec-badge{background:var(--green-light);color:var(--green)}
+  .sec-title{flex:1;font-size:15px;font-weight:600;color:var(--gray-900)}
+  .sec-subtitle{font-size:12px;color:var(--gray-500);margin-top:2px;font-weight:400}
+  .chevron{font-size:18px;color:var(--gray-500);transition:transform 0.25s;margin-left:4px}
+  .section-card.open .chevron{transform:rotate(180deg)}
+  .section-body{display:none;padding:0 22px 22px}
+  .section-card.open .section-body{display:block}
+
+  .video-block{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:8px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color 0.15s}
+  .video-block:hover{border-color:var(--blue)}
+  .video-icon{width:40px;height:40px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .video-icon svg{fill:#fff;width:18px;height:18px}
+  .video-label{font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray-500);margin-bottom:2px}
+  .video-title{font-size:14px;font-weight:600;color:var(--gray-900)}
+  .video-note{font-size:12px;color:var(--gray-500);margin-top:2px}
+
+  .sec-divider{height:1px;background:var(--gray-200);margin:20px 0}
+
+  .content-block h3{font-size:13px;font-weight:700;color:var(--gray-900);margin:18px 0 8px;text-transform:uppercase;letter-spacing:0.4px}
+  .content-block p{font-size:14px;color:var(--gray-700);margin-bottom:10px;line-height:1.65}
+  .content-block ul{margin:0 0 12px 0;padding-left:20px}
+  .content-block ul li{font-size:14px;color:var(--gray-700);margin-bottom:5px;line-height:1.55}
+  .callout{background:var(--blue-light);border-left:3px solid var(--blue);border-radius:0 6px 6px 0;padding:12px 16px;margin:14px 0}
+  .callout p{margin:0;font-size:13.5px;color:var(--gray-700)}
+
+  .quiz-block{background:#FFF8F0;border:1.5px solid #E07B00;border-radius:8px;padding:18px 20px;margin-top:20px}
+  .quiz-block-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .quiz-icon{width:32px;height:32px;background:#E07B00;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .quiz-icon svg{fill:#fff;width:15px;height:15px}
+  .quiz-block-title{font-size:14px;font-weight:700;color:#CC6B00}
+  .quiz-block-desc{font-size:13px;color:var(--gray-700);margin-bottom:14px}
+  .quiz-link-btn{display:inline-block;padding:9px 20px;background:var(--blue);color:#fff;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none;transition:background 0.15s}
+  .quiz-link-btn:hover{background:var(--blue-mid)}
+
+  @media(max-width:680px){
+    #sidebar{display:none}
+    #main{margin-left:0}
+    #content{padding:20px 16px}
+  }
+</style>
+</head>
+<body>
+<div id="shell">
+
+<nav id="sidebar">
+  <div class="sb-header">
+    <div class="sb-logo">SpectrumVoIP</div>
+    <div class="sb-sub">Managed IT Training</div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-item" onclick="scrollTo('s1')"><div class="sb-num">1</div><div class="sb-text">What is IT / Managed IT / MSP</div></div>
+    <div class="sb-item" onclick="scrollTo('s2')"><div class="sb-num">2</div><div class="sb-text">Users &amp; Identity</div></div>
+    <div class="sb-item" onclick="scrollTo('s3')"><div class="sb-num">3</div><div class="sb-text">Endpoints (Devices)</div></div>
+    <div class="sb-item" onclick="scrollTo('s4')"><div class="sb-num">4</div><div class="sb-text">Network</div></div>
+    <div class="sb-item" onclick="scrollTo('s5')"><div class="sb-num">5</div><div class="sb-text">Cybersecurity</div></div>
+    <div class="sb-item" onclick="scrollTo('s6')"><div class="sb-num">6</div><div class="sb-text">Opening the Door</div></div>
+    <div class="sb-item" onclick="scrollTo('s7')"><div class="sb-num">★</div><div class="sb-text">Final Certification Quiz</div></div>
+  </div>
+</nav>
+
+<div id="main">
+  <div id="topbar">
+    <div class="topbar-title">Managed IT Foundations</div>
+    <div class="topbar-sub">SpectrumVoIP — Internal Training</div>
+  </div>
+  <div id="content">
+
+    <!-- ===================== SECTION 1 ===================== -->
+    <div class="section-card" id="s1">
+      <div class="section-header" onclick="toggle('s1')">
+        <div class="sec-badge">1</div>
+        <div style="flex:1"><div class="sec-title">What is IT / Managed IT / MSP</div><div class="sec-subtitle">Foundations — understanding the basics</div></div>
+        <span class="chevron">⌄</span>
+      </div>
+      <div class="section-body">
+        <!-- ADMIN: Replace # below with your Video 1 URL -->
+        <a href="https://spectrumvoip.sharepoint.com/:v:/s/MSP/IQA4TnD-xf7cRYeBn0R7lQ3EAZLJNwwnxE1WAu7kpOClxX4?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D&e=KYHDAz" target="_blank" style="text-decoration:none">
+        <div class="video-block">
+          <div class="video-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+          <div><div class="video-label">Watch first</div><div class="video-title">Video 1: What is IT / Managed IT / MSP</div><div class="video-note">Click to watch — then read the section below.</div></div>
+        </div></a>
+        <div class="content-block">
+          <h3>What is IT?</h3>
+          <p>IT stands for <strong>Information Technology</strong> — everything that keeps a business running from a technology standpoint. This includes computers, email, internet, networks, security, data, and the systems people use every day to do their jobs.</p>
+          <p>A simple way to think about IT is in four parts: the <strong>people</strong> using it, the <strong>devices</strong> they use, the <strong>network</strong> that connects everything, and the <strong>security</strong> that protects it.</p>
+          <h3>Break-Fix vs. Managed IT</h3>
+          <p>Traditionally, many businesses handled IT reactively — something breaks, someone fixes it. This is called <strong>break-fix IT</strong>. The problem is that issues are only addressed after they happen, leading to downtime, frustration, and security risks.</p>
+          <div class="callout"><p><strong>Managed IT Services</strong> take a different approach. Instead of waiting for issues, systems are proactively monitored, updated, and supported on a continuous basis — meaning fewer problems, less downtime, and a more secure environment.</p></div>
+          <h3>What is an MSP?</h3>
+          <p><strong>MSP</strong> stands for <strong>Managed Service Provider</strong> — a company responsible for managing and supporting a business's IT environment on an ongoing basis. Think of it as having a dedicated team working behind the scenes to keep everything running smoothly, rather than only stepping in when something goes wrong.</p>
+        </div>
+        <div class="sec-divider"></div>
+        <div class="quiz-block">
+          <div class="quiz-block-header"><div class="quiz-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></div><div class="quiz-block-title">Section 1 Quiz</div></div>
+          <div class="quiz-block-desc">You've finished Section 1. Click below to take the short quiz before moving on.</div>
+          <!-- ADMIN: Replace # below with your Microsoft Forms URL for Section 1 -->
+          <a class="quiz-link-btn" href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=y3iyux88TUq4St6YAOLr0JW2BXNY2hVPgC6Ugg7tG-dURDNMWjE0UzRCUFk1UlFZQjA3TVlFVlE5Sy4u" target="_blank">Take Section Quiz ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== SECTION 2 ===================== -->
+    <div class="section-card" id="s2">
+      <div class="section-header" onclick="toggle('s2')">
+        <div class="sec-badge">2</div>
+        <div style="flex:1"><div class="sec-title">Users &amp; Identity</div><div class="sec-subtitle">Who logs in and what they can access</div></div>
+        <span class="chevron">⌄</span>
+      </div>
+      <div class="section-body">
+        <!-- ADMIN: Replace # below with your Video 2 URL -->
+        <a href="https://spectrumvoip.sharepoint.com/:v:/s/MSP/IQAHDub7SlE2Q7VYQ1ALH8NoAWtC_dUYPo1Z_t_KdH44yIs?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D&e=Zp6bcV" target="_blank" style="text-decoration:none">
+        <div class="video-block">
+          <div class="video-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+          <div><div class="video-label">Watch first</div><div class="video-title">Video 2: Users &amp; Identity</div><div class="video-note">Click to watch — then read the section below.</div></div>
+        </div></a>
+        <div class="content-block">
+          <h3>What is a user?</h3>
+          <p>A <strong>user</strong> is anyone who logs into a system, email, or device — employees, managers, and sometimes vendors or partners with access to company systems. Every user has credentials (typically a username and password) to access the tools they need.</p>
+          <h3>Why identity matters</h3>
+          <p><strong>Identity</strong> refers to who someone is in a digital environment and what they are allowed to access. Managing identity means making sure the right people have access to the right systems — and just as importantly, that they don't have access to things they shouldn't.</p>
+          <div class="callout"><p><strong>One of the biggest risks in IT today is compromised user accounts.</strong> For example, a phishing email tricks someone into entering their password on a fake website — an attacker who gains that access can reach email, files, and other systems.</p></div>
+          <h3>Multi-Factor Authentication (MFA)</h3>
+          <p><strong>MFA</strong> adds an extra layer of protection by requiring a second step at login — such as a code sent to a phone or an authentication app. Even if a password is compromised, MFA makes it much harder for an attacker to gain access.</p>
+          <h3>User lifecycle management</h3>
+          <p>User management also includes creating accounts for new employees, removing access when someone leaves, and updating permissions as roles change. If an employee leaves and their account isn't disabled, that creates a major security risk.</p>
+        </div>
+        <div class="sec-divider"></div>
+        <div class="quiz-block">
+          <div class="quiz-block-header"><div class="quiz-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></div><div class="quiz-block-title">Section 2 Quiz</div></div>
+          <div class="quiz-block-desc">You've finished Section 2. Click below to take the short quiz before moving on.</div>
+          <!-- ADMIN: Replace # below with your Microsoft Forms URL for Section 2 -->
+          <a class="quiz-link-btn" href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=y3iyux88TUq4St6YAOLr0JW2BXNY2hVPgC6Ugg7tG-dUOE9GWDNSUFpDMEk3NkwyTzFTTFE5UVJFUS4u" target="_blank">Take Section Quiz ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== SECTION 3 ===================== -->
+    <div class="section-card" id="s3">
+      <div class="section-header" onclick="toggle('s3')">
+        <div class="sec-badge">3</div>
+        <div style="flex:1"><div class="sec-title">Endpoints (Devices)</div><div class="sec-subtitle">The devices your users depend on</div></div>
+        <span class="chevron">⌄</span>
+      </div>
+      <div class="section-body">
+        <!-- ADMIN: Replace # below with your Video 3 URL -->
+        <a href="https://spectrumvoip.sharepoint.com/:v:/s/MSP/IQCtb0wpBfYBTq9jb-qETvQaAZ7iiFY-xbtfHlLBGumv_DU?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D&e=AfSv3N" target="_blank" style="text-decoration:none">
+        <div class="video-block">
+          <div class="video-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+          <div><div class="video-label">Watch first</div><div class="video-title">Video 3: Endpoints (Devices)</div><div class="video-note">Click to watch — then read the section below.</div></div>
+        </div></a>
+        <div class="content-block">
+          <h3>What is an endpoint?</h3>
+          <p>An <strong>endpoint</strong> is any device that connects to a network — laptops, desktops, and mobile devices. These are where most work gets done, but they are also one of the most common entry points for security threats.</p>
+          <h3>Device health monitoring</h3>
+          <p>Endpoint management includes monitoring the health of devices to ensure they're running properly and identifying issues before they become major problems. If a device starts slowing down or showing signs of failure, it can be addressed early before it impacts the user.</p>
+          <h3>Patching</h3>
+          <p><strong>Patching</strong> means regularly installing updates for the operating system and software. These updates fix security vulnerabilities and improve performance. If devices aren't kept up to date, they become easy targets for cyber threats.</p>
+          <div class="callout"><p>If a known vulnerability exists and a device hasn't been patched, attackers can take advantage of that weakness. A single compromised device can impact not just one user — but potentially the entire business.</p></div>
+          <h3>Endpoint security tools</h3>
+          <p>Endpoint management also includes security tools that monitor activity on devices and look for signs of suspicious behavior. If something unusual is detected, it can be investigated and addressed before it becomes a larger issue.</p>
+        </div>
+        <div class="sec-divider"></div>
+        <div class="quiz-block">
+          <div class="quiz-block-header"><div class="quiz-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></div><div class="quiz-block-title">Section 3 Quiz</div></div>
+          <div class="quiz-block-desc">You've finished Section 3. Click below to take the short quiz before moving on.</div>
+          <!-- ADMIN: Replace # below with your Microsoft Forms URL for Section 3 -->
+          <a class="quiz-link-btn" href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=y3iyux88TUq4St6YAOLr0JW2BXNY2hVPgC6Ugg7tG-dUMEsyS0pPRDA5U01XUUlENENZOUxLQVhYUC4u" target="_blank">Take Section Quiz ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== SECTION 4 ===================== -->
+    <div class="section-card" id="s4">
+      <div class="section-header" onclick="toggle('s4')">
+        <div class="sec-badge">4</div>
+        <div style="flex:1"><div class="sec-title">Network</div><div class="sec-subtitle">The foundation connecting everything</div></div>
+        <span class="chevron">⌄</span>
+      </div>
+      <div class="section-body">
+        <!-- ADMIN: Replace # below with your Video 4 URL -->
+        <a href="https://spectrumvoip.sharepoint.com/:v:/s/MSP/IQA4iyRWdpFJTLhqvXUAaoJUAdv6y2gdPYvcbdDqF_n3-HU?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D&e=EqkFtv" target="_blank" style="text-decoration:none">
+        <div class="video-block">
+          <div class="video-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+          <div><div class="video-label">Watch first</div><div class="video-title">Video 4: Network</div><div class="video-note">Click to watch — then read the section below.</div></div>
+        </div></a>
+        <div class="content-block">
+          <h3>What is the network?</h3>
+          <p>The <strong>network</strong> is what connects everything together — internet connections, WiFi, firewalls, switches, access points, and the systems that allow devices and applications to communicate. Every computer, phone, printer, and cloud application depends on the network functioning properly.</p>
+          <h3>Internet connectivity</h3>
+          <p>Most businesses today rely heavily on cloud applications and online systems. If the internet goes down, employees may lose access to email, shared files, cloud software, phone systems, and critical business applications. Even short outages create downtime and lost productivity.</p>
+          <h3>WiFi &amp; access points</h3>
+          <p>WiFi needs to be properly designed, securely configured, monitored for performance, and capable of supporting all connected users and devices. An <strong>access point</strong> is the device that broadcasts the wireless signal throughout the building — most businesses have multiple access points for full coverage.</p>
+          <div class="callout"><p>If access points are poorly placed or overloaded, employees may experience dropped connections, slow speeds, poor call quality, or unreliable application performance.</p></div>
+          <h3>Firewalls</h3>
+          <p>A <strong>firewall</strong> acts as a security gatekeeper between the internal network and the internet — monitoring and controlling what traffic is allowed in and out. Without a properly configured firewall, businesses are much more exposed to unauthorized access, malicious traffic, and external attacks.</p>
+          <h3>Switches</h3>
+          <p><strong>Switches</strong> physically connect devices together inside the network. Computers, printers, phones, servers, and access points often connect back to network switches. While users may never see them directly, switches play a major role in keeping communication flowing throughout the environment.</p>
+          <h3>Network management</h3>
+          <p>Network management covers monitoring traffic, identifying outages or slowdowns, maintaining security settings, updating firmware, and ensuring systems operate efficiently as the business grows. A well-managed network reduces downtime, improves productivity, supports remote work, and strengthens overall cybersecurity.</p>
+        </div>
+        <div class="sec-divider"></div>
+        <div class="quiz-block">
+          <div class="quiz-block-header"><div class="quiz-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></div><div class="quiz-block-title">Section 4 Quiz</div></div>
+          <div class="quiz-block-desc">You've finished Section 4. Click below to take the short quiz before moving on.</div>
+          <!-- ADMIN: Replace # below with your Microsoft Forms URL for Section 4 -->
+          <a class="quiz-link-btn" href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=y3iyux88TUq4St6YAOLr0JW2BXNY2hVPgC6Ugg7tG-dUOVQ4UUJXMzhERkMwUEE2STdBMVlBQVhXMC4u" target="_blank">Take Section Quiz ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== SECTION 5 ===================== -->
+    <div class="section-card" id="s5">
+      <div class="section-header" onclick="toggle('s5')">
+        <div class="sec-badge">5</div>
+        <div style="flex:1"><div class="sec-title">Cybersecurity</div><div class="sec-subtitle">Protecting systems, users, and data</div></div>
+        <span class="chevron">⌄</span>
+      </div>
+      <div class="section-body">
+        <!-- ADMIN: Replace # below with your Video 5 URL -->
+        <a href="https://spectrumvoip.sharepoint.com/:v:/s/MSP/IQCovJeAJUFHS7kxFqkPocPWAZJiTPMV_oLC_NH_X57cEmk?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D&e=kLHILN" target="_blank" style="text-decoration:none">
+        <div class="video-block">
+          <div class="video-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+          <div><div class="video-label">Watch first</div><div class="video-title">Video 5: Cybersecurity</div><div class="video-note">Click to watch — then read the section below.</div></div>
+        </div></a>
+        <div class="content-block">
+          <h3>What is cybersecurity?</h3>
+          <p><strong>Cybersecurity</strong> is the process of protecting systems, devices, users, and data from threats — including phishing emails, ransomware, malicious websites, stolen passwords, unauthorized access, and social engineering attacks.</p>
+          <div class="callout"><p>Today, almost every business is a target. Small and mid-sized businesses are attacked every day because attackers know they often have fewer resources and less protection in place.</p></div>
+          <h3>Common threats</h3>
+          <p><strong>Phishing</strong> is when someone receives an email or message designed to look legitimate, tricking them into clicking a malicious link, downloading malware, entering their password, or sending sensitive information.</p>
+          <p><strong>Ransomware</strong> is malicious software that encrypts files and systems, making them inaccessible until a ransom payment is made. It can spread quickly across a network and lead to downtime, lost revenue, and significant recovery costs.</p>
+          <h3>Modern cybersecurity approach</h3>
+          <p>Traditional antivirus alone isn't enough anymore. Modern threats are designed to bypass it. Today's approach is built around five pillars:</p>
+          <ul>
+            <li><strong>Prevention</strong> — reducing the attack surface before threats occur</li>
+            <li><strong>Monitoring</strong> — continuous visibility into system activity</li>
+            <li><strong>Detection</strong> — identifying suspicious behavior quickly</li>
+            <li><strong>Response</strong> — containing and neutralizing threats fast</li>
+            <li><strong>Recovery</strong> — restoring systems after an incident</li>
+          </ul>
+          <h3>Huntress — our cybersecurity layer</h3>
+          <p>We use <strong>Huntress</strong> as an additional layer of cybersecurity protection. Huntress continuously monitors endpoints and systems for signs of malicious activity. When something suspicious is detected, a <strong>real human security team</strong> reviews it — not automation alone — improving accuracy and response speed.</p>
+          <p>If a threat is confirmed, the affected device can be <strong>isolated (quarantined)</strong> almost immediately to prevent it from spreading across the network.</p>
+          <h3>It's also about people</h3>
+          <p>Many cyber incidents begin with simple human mistakes — clicking a bad link, reusing passwords, or responding to fraudulent emails. Education and awareness are critical parts of a strong cybersecurity strategy. Cybersecurity is not just one tool — it's a layered approach designed to reduce risk across the entire environment.</p>
+        </div>
+        <div class="sec-divider"></div>
+        <div class="quiz-block">
+          <div class="quiz-block-header"><div class="quiz-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></div><div class="quiz-block-title">Section 5 Quiz</div></div>
+          <div class="quiz-block-desc">You've finished Section 5. Click below to take the short quiz before moving on.</div>
+          <!-- ADMIN: Replace # below with your Microsoft Forms URL for Section 5 -->
+          <a class="quiz-link-btn" href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=y3iyux88TUq4St6YAOLr0JW2BXNY2hVPgC6Ugg7tG-dUOEFSQkZZMjZFTU85QjZSVlRUSlg4WUI3My4u" target="_blank">Take Section Quiz ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== SECTION 6 ===================== -->
+    <div class="section-card" id="s6">
+      <div class="section-header" onclick="toggle('s6')">
+        <div class="sec-badge">6</div>
+        <div style="flex:1"><div class="sec-title">Opening the Door</div><div class="sec-subtitle">Starting Managed IT conversations with customers</div></div>
+        <span class="chevron">⌄</span>
+      </div>
+      <div class="section-body">
+        <!-- ADMIN: Replace # below with your Video 6 URL -->
+        <a href="https://spectrumvoip.sharepoint.com/:v:/s/MSP/IQDKxy1MuTKiSZHnZjDlPAy3AfE64bWMTCBJUQm91RBq-UI?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D&e=sJP3XO" target="_blank" style="text-decoration:none">
+        <div class="video-block">
+          <div class="video-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+          <div><div class="video-label">Watch first</div><div class="video-title">Video 6: Opening the Door</div><div class="video-note">Click to watch — then read the section below.</div></div>
+        </div></a>
+        <div class="content-block">
+          <h3>Your role</h3>
+          <p>The goal of this section is not to turn you into a technical expert. Your role is much simpler: <strong>recognize opportunities, ask a few good questions, and comfortably open the door to a Managed IT conversation.</strong> You are not expected to troubleshoot problems or provide technical solutions on the spot.</p>
+          <h3>Opportunities are everywhere</h3>
+          <p>Almost every business depends heavily on technology. Customers will often bring up frustrations naturally — slow computers, unreliable WiFi, remote employees, cybersecurity concerns, downtime, or simply "things never seem to work right." All of those can indicate an opportunity.</p>
+          <h3>Great opening questions</h3>
+          <ul>
+            <li><strong>"What are you guys doing for IT today?"</strong> — casual, non-threatening, and easy to answer</li>
+            <li>"Who handles your computers and cybersecurity today?"</li>
+            <li>"Do you have internal IT, or do you work with an outside IT company?"</li>
+          </ul>
+          <h3>Signals to listen for</h3>
+          <ul>
+            <li>"Our IT guy is overloaded" / "Support takes forever"</li>
+            <li>"We've had some security scares" / "We've had phishing problems"</li>
+            <li>"Our systems are always down"</li>
+            <li>"We've grown a lot recently" / "We're adding new locations"</li>
+            <li>"We don't really know if we're protected"</li>
+          </ul>
+          <div class="callout"><p>Environmental changes also signal opportunity: company growth, remote employees, compliance requirements, new software rollouts, aging infrastructure, or leadership concerns around cybersecurity.</p></div>
+          <h3>Co-managed IT</h3>
+          <p>Many businesses use <strong>co-managed IT</strong> — keeping internal IT staff but partnering with an MSP for cybersecurity, endpoint monitoring, patching, after-hours support, or compliance. Don't approach these conversations as "we want to replace your IT." Focus on learning about their environment and identifying where additional support may help.</p>
+          <h3>How to transition the conversation</h3>
+          <ul>
+            <li><em>"That's actually something our Managed IT team helps businesses with quite a bit. Would you be open to a quick conversation with them?"</em></li>
+            <li><em>"We've been helping a lot of businesses simplify and secure their IT. I'd love to set up a quick intro with our Managed IT team."</em></li>
+          </ul>
+        </div>
+        <div class="sec-divider"></div>
+        <div class="quiz-block">
+          <div class="quiz-block-header"><div class="quiz-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></div><div class="quiz-block-title">Section 6 Quiz</div></div>
+          <div class="quiz-block-desc">You've finished Section 6. Click below to take the short quiz before moving on.</div>
+          <!-- ADMIN: Replace # below with your Microsoft Forms URL for Section 6 -->
+          <a class="quiz-link-btn" href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=y3iyux88TUq4St6YAOLr0JW2BXNY2hVPgC6Ugg7tG-dURERJQjA4WlFWTUVENUNKNU03TzNWOVZMWi4u" target="_blank">Take Section Quiz ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== FINAL CERT ===================== -->
+    <div class="section-card" id="s7">
+      <div class="section-header" onclick="toggle('s7')">
+        <div class="sec-badge">★</div>
+        <div style="flex:1"><div class="sec-title">Final Certification Quiz</div><div class="sec-subtitle">10 questions covering all sections</div></div>
+        <span class="chevron">⌄</span>
+      </div>
+      <div class="section-body">
+        <div class="content-block">
+          <p>You've completed all six training sections. The Final Certification Quiz covers material from every section — users, devices, networks, cybersecurity, and sales conversations.</p>
+          <ul style="margin-top:10px">
+            <li>10 multiple-choice questions</li>
+            <li>Covers all six training sections</li>
+            <li>Complete this quiz to finish your training</li>
+          </ul>
+        </div>
+        <div class="sec-divider"></div>
+        <div class="quiz-block">
+          <div class="quiz-block-header"><div class="quiz-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></div><div class="quiz-block-title">Final Certification Quiz</div></div>
+          <div class="quiz-block-desc">Click below to begin your certification quiz. Good luck!</div>
+          <!-- ADMIN: Replace # below with your Microsoft Forms URL for the Final Certification Quiz -->
+          <a class="quiz-link-btn" href="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=y3iyux88TUq4St6YAOLr0JW2BXNY2hVPgC6Ugg7tG-dUNjhZSFoyN1BJMlpSS004SklJTDY4SEU2Sy4u" target="_blank">Begin Certification Quiz ↗</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+function toggle(id){
+  const card=document.getElementById(id);
+  card.classList.toggle('open');
+}
+function scrollTo(id){
+  const card=document.getElementById(id);
+  if(!card.classList.contains('open')) card.classList.add('open');
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+</script>
+</body>
+</html>
